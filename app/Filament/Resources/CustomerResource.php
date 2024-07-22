@@ -15,6 +15,8 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -57,13 +59,22 @@ class CustomerResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')->searchable()->sortable(),
-                TextColumn::make('email')->searchable()->sortable(),
-                TextColumn::make('phone')->searchable()->sortable(),
+                TextColumn::make('email')->searchable()->sortable()->toggleable(),
+                TextColumn::make('phone')->searchable()->sortable()->toggleable(),
                 IconColumn::make('status')
                     ->boolean()->sortable(),
             ])
+            ->defaultSort('id', 'desc')
+            ->searchPlaceholder('Search (Name, Email, Phone)')
             ->filters([
-                //
+                Filter::make('status')
+                    ->query(fn (Builder $query) => $query->where('status', true)),
+                SelectFilter::make('country')
+                    ->options([
+                        'US' => 'US',
+                        'UK' => 'UK',
+                        'PAK' => 'PAK',
+                    ]),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
